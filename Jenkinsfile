@@ -29,8 +29,6 @@ podTemplate(yaml: '''
             path: config.json
 ''') {
   node(POD_LABEL) {
-    withEnv(['DATE = new Date().format('yy.M')',
-             'TAG = '${DATE}.${BUILD_NUMBER}'']) {
     stage('Get a Maven project') {
       git url: 'https://github.com/ashishonnet/hello-world.git', branch: 'main'
       container('maven') {
@@ -69,7 +67,7 @@ podTemplate(yaml: '''
             --context `pwd` \
             --skip-tls-verify \
             --insecure \
-            --destination 172.29.66.98:30002/demo/hello-world:${TAG} \
+            --destination 172.29.66.98:30002/demo/hello-world:${BUILD_NUMBER} \
           '''
         }
       }
