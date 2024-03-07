@@ -9,6 +9,15 @@ podTemplate(yaml: '''
         - sleep
         args:
         - 99d
+      - name: kubectl
+        image: bitnami/kubectl:latest
+        command:
+        - sleep
+        args:
+        - 99d
+        tty: true
+        securityContext:
+          runAsUser: 0
       - name: kaniko
         image: gcr.io/kaniko-project/executor:debug
         imagePullPolicy: Always
@@ -73,12 +82,14 @@ podTemplate(yaml: '''
       }
     }
 
-    stage('List Configmaps') {
-        withKubeConfig([namespace: "deploy-test"]) {
-          sh 'kubectl apply -f deployment.yaml'
+    stage('Deploy') {
+        container(name: 'kubectl', shell: '/bin/sh') {
+        withCredentials([file(credentialsId: 'TMPKUBECONFIG', variable: 'TMPKUBECONFIG_FILE')]) {
+            sh '''cp \$TMPKUBECONFIG_FILE /.kube/config
+                  kubectl apply -f deployment.yaml -n deploy-test
+            '''
         }
-
-    
 }
 }
   }
+}
