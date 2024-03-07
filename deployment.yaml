@@ -31,7 +31,7 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 31220
+      nodePort: 31230
   selector:
     name: hello-world
   type: NodePort
