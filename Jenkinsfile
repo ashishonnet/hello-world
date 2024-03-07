@@ -85,11 +85,26 @@ podTemplate(yaml: '''
     stage('Deploy') {
         container(name: 'kubectl', shell: '/bin/sh') {
         withCredentials([file(credentialsId: 'TMPKUBECONFIG', variable: 'TMPKUBECONFIG_FILE')]) {
-            sh '''cp \$TMPKUBECONFIG_FILE /.kube/config
-                  kubectl apply -f deployment.yaml -n deploy-test
-            '''
+          steps {
+                script {
+                    // Read the Kubernetes manifest file
+                    def kubeManifest = readFile 'deployment.yaml'
+
+                    // Replace the placeholder with BUILD_NUMBER
+                    kubeManifest = kubeManifest.replaceAll('\\$\\{BUILD_NUMBER\\}', env.BUILD_NUMBER)
+
+                    // Apply the modified manifest
+                    sh '''
+                    cp \$TMPKUBECONFIG_FILE /.kube/config
+                    kubectl apply -f -n deploy-test - <<< '${kubeManifest}'
+                    '''
+                }
+}
+        
         }
 }
 }
   }
 }
+
+
