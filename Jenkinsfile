@@ -89,7 +89,9 @@ podTemplate(yaml: '''
                     withCredentials([file(credentialsId: 'TMPKUBECONFIG', variable: 'TMPKUBECONFIG_FILE')]) {
                     sh '''
                     cp \$TMPKUBECONFIG_FILE /.kube/config
-                    cat deployment.yaml | sed "s/{{BUILD_NUMBER}}/$BUILD_NUMBER/g" | kubectl -n deploy-test apply -f -
+                    cat deployment.yaml | sed "s/BUILD_NUMBER/${BUILD_NUMBER}/g" >> deployment_modified.yaml
+                    cat deployment_modified.yaml
+                    kubectl -n deploy-test apply -f deployment_modified.yaml
                     '''
                 }
 }
